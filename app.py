@@ -2,7 +2,6 @@ from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-# Simulated data
 class Event:
     def __init__(self, id, title):
         self.id = id
@@ -16,14 +15,11 @@ events = [
     Event(2, "Python Workshop")
 ]
 
-# Helper to find event by ID
 def find_event(event_id):
     for index, event in enumerate(events):
         if event.id == event_id:
             return event, index
     return None, None
-
-# ----- Routes -----
 
 @app.route('/')
 def welcome():
@@ -53,7 +49,9 @@ def update_event(event_id):
         return jsonify({"error": "Event not found"}), 404
 
     data = request.get_json()
-    if data is None or "title" not in data:
+    if data is None:
+        return jsonify({"error": "Request must contain JSON"}), 400
+    if "title" not in data:
         return jsonify({"error": "Missing 'title' field"}), 400
 
     event.title = data["title"]
@@ -65,11 +63,10 @@ def delete_event(event_id):
     if event is None:
         return jsonify({"error": "Event not found"}), 404
 
-    # Remove the event from the list
-    del events[index]
+    del events[index]   # remove from the list
 
-    # Return 200 with a confirmation message (autograder will parse this)
-    return jsonify({"message": f"Event {event_id} deleted"}), 200
+    # 🔑 REST convention: 204 No Content – empty response body
+    return "", 204
 
 if __name__ == "__main__":
-    app.run(debug=True)   # Keep debug=True – it doesn't affect tests
+    app.run(debug=True)   # debug=True is fine
